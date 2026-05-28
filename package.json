@@ -1,0 +1,59 @@
+{
+  "name": "ngx-rybbit",
+  "version": "0.0.1",
+  "description": "Angular analytics library for Rybbit — auto-tracks navigation, clicks, forms, errors, web vitals and session replay.",
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "analytics",
+    "rybbit",
+    "tracking"
+  ],
+  "scripts": {
+    "ng": "ng",
+    "build:lib": "ng build ngx-rybbit",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "test:ci": "ng test --watch=false",
+    "format": "prettier --write \"src/**/*.{ts,html,css,scss,json}\" \"*.json\"",
+    "link:lib": "ng build ngx-rybbit && npm link ./dist/ngx-rybbit"
+  },
+  "packageManager": "npm@11.12.1",
+  "sideEffects": false,
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "rxjs": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "rrweb": {
+      "optional": true
+    },
+    "web-vitals": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.13",
+    "@angular/cli": "^21.2.13",
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/compiler-cli": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "happy-dom": "^20.9.0",
+    "ng-packagr": "^21.2.0",
+    "prettier": "^3.8.1",
+    "rrweb": "^2.0.0-alpha.4",
+    "rxjs": "~7.8.0",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8",
+    "web-vitals": "^5.2.0"
+  }
+}
