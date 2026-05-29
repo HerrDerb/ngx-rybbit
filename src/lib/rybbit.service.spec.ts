@@ -6,6 +6,10 @@ import { RybbitService } from './rybbit.service';
 import { RybbitSessionReplayService } from './rybbit-session-replay.service';
 import type { RybbitConfig } from './rybbit.config';
 
+type RybbitServicePrivate = {
+  sendTrack: (payload: object) => Promise<void>;
+};
+
 const TEST_CONFIG: RybbitConfig = { siteId: 42, apiBase: 'https://api.test.io/api' };
 
 function createLocalStorageMock() {
@@ -42,14 +46,17 @@ function setupTestBed(config: Partial<RybbitConfig> = {}) {
   });
   const service = TestBed.inject(RybbitService);
   const runtimeState = TestBed.inject(RybbitRuntimeState);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sendTrackSpy = vi.spyOn(service as any, 'sendTrack').mockResolvedValue(undefined);
+  const sendTrackSpy = vi
+    .spyOn(service as unknown as RybbitServicePrivate, 'sendTrack')
+    .mockResolvedValue(undefined);
   return { service, runtimeState, sendTrackSpy };
 }
 
 describe('RybbitService', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', createLocalStorageMock());
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal('navigator', { sendBeacon: vi.fn().mockReturnValue(true) });
     history.pushState({}, '', '/');
     delete (globalThis.window as unknown as Record<string, unknown>)['__RYBBIT_OPTOUT__'];
   });
@@ -284,7 +291,10 @@ describe('RybbitService', () => {
       vi.stubGlobal('navigator', { sendBeacon: mockBeacon });
       const { service, sendTrackSpy } = setupTestBed();
       sendTrackSpy.mockRestore();
-      await (service as any).sendTrack({ type: 'pageview', site_id: '42' });
+      await (service as unknown as RybbitServicePrivate).sendTrack({
+        type: 'pageview',
+        site_id: '42',
+      });
       expect(mockBeacon).toHaveBeenCalledWith('https://api.test.io/api/track', expect.any(Blob));
       vi.unstubAllGlobals();
     });
@@ -295,10 +305,16 @@ describe('RybbitService', () => {
       vi.stubGlobal('fetch', mockFetch);
       const { service, sendTrackSpy } = setupTestBed();
       sendTrackSpy.mockRestore();
-      await (service as any).sendTrack({ type: 'pageview', site_id: '42' });
+      await (service as unknown as RybbitServicePrivate).sendTrack({
+        type: 'pageview',
+        site_id: '42',
+      });
       expect(mockFetch).toHaveBeenCalledWith(
         'https://api.test.io/api/track',
-        expect.objectContaining({ method: 'POST', body: expect.stringContaining('"type":"pageview"') }),
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('"type":"pageview"'),
+        }),
       );
       vi.unstubAllGlobals();
     });
@@ -309,7 +325,10 @@ describe('RybbitService', () => {
       vi.stubGlobal('fetch', mockFetch);
       const { service, sendTrackSpy } = setupTestBed();
       sendTrackSpy.mockRestore();
-      await (service as any).sendTrack({ type: 'pageview', site_id: '42' });
+      await (service as unknown as RybbitServicePrivate).sendTrack({
+        type: 'pageview',
+        site_id: '42',
+      });
       expect(mockFetch).toHaveBeenCalled();
       vi.unstubAllGlobals();
     });
@@ -319,7 +338,9 @@ describe('RybbitService', () => {
       vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network error')));
       const { service, sendTrackSpy } = setupTestBed();
       sendTrackSpy.mockRestore();
-      await expect((service as any).sendTrack({})).resolves.toBeUndefined();
+      await expect(
+        (service as unknown as RybbitServicePrivate).sendTrack({}),
+      ).resolves.toBeUndefined();
       vi.unstubAllGlobals();
     });
   });

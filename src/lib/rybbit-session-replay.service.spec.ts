@@ -4,6 +4,12 @@ import { RYBBIT_CONFIG } from './tokens';
 import { RybbitSessionReplayService } from './rybbit-session-replay.service';
 import type { RybbitConfig } from './rybbit.config';
 
+type SessionReplayPrivate = {
+  eventBuffer: unknown[];
+  sessionId: string | null;
+  flush: () => void;
+};
+
 const TEST_CONFIG: RybbitConfig = {
   siteId: 7,
   apiBase: 'https://api.test.io/api',
@@ -94,12 +100,12 @@ describe('RybbitSessionReplayService', () => {
       vi.stubGlobal('fetch', mockFetch);
       localStorage.setItem('disable-rybbit', '1');
 
-      (service as any).eventBuffer = ['event1', 'event2'];
-      (service as any).flush();
+      (service as unknown as SessionReplayPrivate).eventBuffer = ['event1', 'event2'];
+      (service as unknown as SessionReplayPrivate).flush();
 
       expect(mockBeacon).not.toHaveBeenCalled();
       expect(mockFetch).not.toHaveBeenCalled();
-      expect((service as any).eventBuffer).toHaveLength(0);
+      expect((service as unknown as SessionReplayPrivate).eventBuffer).toHaveLength(0);
       vi.unstubAllGlobals();
     });
 
@@ -108,9 +114,9 @@ describe('RybbitSessionReplayService', () => {
       const mockBeacon = vi.fn().mockReturnValue(true);
       vi.stubGlobal('navigator', { sendBeacon: mockBeacon });
 
-      (service as any).sessionId = 'test-session-id';
-      (service as any).eventBuffer = [{ type: 2 }, { type: 3 }];
-      (service as any).flush();
+      (service as unknown as SessionReplayPrivate).sessionId = 'test-session-id';
+      (service as unknown as SessionReplayPrivate).eventBuffer = [{ type: 2 }, { type: 3 }];
+      (service as unknown as SessionReplayPrivate).flush();
 
       await new Promise((r) => setTimeout(r, 0));
 
@@ -127,9 +133,9 @@ describe('RybbitSessionReplayService', () => {
       const mockFetch = vi.fn().mockResolvedValue({ ok: true });
       vi.stubGlobal('fetch', mockFetch);
 
-      (service as any).sessionId = 'test-session-id';
-      (service as any).eventBuffer = [{ type: 2 }, { type: 3 }];
-      (service as any).flush();
+      (service as unknown as SessionReplayPrivate).sessionId = 'test-session-id';
+      (service as unknown as SessionReplayPrivate).eventBuffer = [{ type: 2 }, { type: 3 }];
+      (service as unknown as SessionReplayPrivate).flush();
 
       await new Promise((r) => setTimeout(r, 0));
 
@@ -142,7 +148,7 @@ describe('RybbitSessionReplayService', () => {
 
     it('flushes remaining buffer on stop()', () => {
       const { service } = setup();
-      const flushSpy = vi.spyOn(service as any, 'flush');
+      const flushSpy = vi.spyOn(service as unknown as SessionReplayPrivate, 'flush');
       service.stop();
       expect(flushSpy).toHaveBeenCalled();
     });

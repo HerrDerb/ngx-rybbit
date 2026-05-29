@@ -100,7 +100,12 @@ export class RybbitService {
   }
 
   async sendTrack(payload: object): Promise<void> {
-    await postBeacon(`${this.config.apiBase}/track`, payload, this.config.apiBase, this.config.debug);
+    await postBeacon(
+      `${this.config.apiBase}/track`,
+      payload,
+      this.config.apiBase,
+      this.config.debug,
+    );
   }
 
   trackPageview(): void {
@@ -235,7 +240,12 @@ export class RybbitService {
       is_new_identify: isNewIdentify,
       ...(traits ? { traits } : {}),
     };
-    await postBeacon(`${this.config.apiBase}/identify`, payload, this.config.apiBase, this.config.debug);
+    await postBeacon(
+      `${this.config.apiBase}/identify`,
+      payload,
+      this.config.apiBase,
+      this.config.debug,
+    );
   }
 
   isExternalUrl(url: string): boolean {

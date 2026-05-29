@@ -8,12 +8,16 @@ import type { RybbitConfig } from './rybbit.config';
 
 const TEST_CONFIG: RybbitConfig = { siteId: 1, apiBase: 'https://api.test.io/api' };
 
+type CopyTrackerPrivate = {
+  handleCopy: () => void;
+};
+
 function makeSelection(text: string): Selection {
   const range = document.createRange();
   const textNode = document.createTextNode(text);
   document.body.appendChild(textNode);
   range.selectNode(textNode);
-  const sel = globalThis.window?.getSelection()!;
+  const sel = globalThis.window?.getSelection() ?? window.getSelection()!;
   sel.removeAllRanges();
   sel.addRange(range);
   return sel;
@@ -44,7 +48,7 @@ describe('RybbitCopyTrackerService', () => {
 
   // Invoke private handler directly to avoid needing a real copy event
   function triggerHandle() {
-    (service as any).handleCopy();
+    (service as unknown as CopyTrackerPrivate).handleCopy();
   }
 
   it('tracks copy with the selected text', () => {

@@ -7,6 +7,12 @@ import { RybbitRuntimeState } from './rybbit-runtime-state.service';
 import { RybbitSessionReplayService } from './rybbit-session-replay.service';
 import type { RybbitConfig } from './rybbit.config';
 
+type WebVitalsPrivate = {
+  vitals: Record<string, number | null>;
+  flush: () => void;
+  maybeSendAll: () => void;
+};
+
 const TEST_CONFIG: RybbitConfig = { siteId: 1, apiBase: 'https://api.test.io/api' };
 
 function createLocalStorageMock() {
@@ -56,15 +62,15 @@ describe('RybbitWebVitalsService', () => {
 
   // Access internals to simulate vital callbacks firing
   function setVitals(svc: RybbitWebVitalsService, partial: Record<string, number | null>) {
-    Object.assign((svc as any).vitals, partial);
+    Object.assign((svc as unknown as WebVitalsPrivate).vitals, partial);
   }
 
   function flush(svc: RybbitWebVitalsService) {
-    (svc as any).flush();
+    (svc as unknown as WebVitalsPrivate).flush();
   }
 
   function maybeSendAll(svc: RybbitWebVitalsService) {
-    (svc as any).maybeSendAll();
+    (svc as unknown as WebVitalsPrivate).maybeSendAll();
   }
 
   describe('maybeSendAll', () => {

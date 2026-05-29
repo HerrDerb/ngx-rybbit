@@ -10,6 +10,11 @@ const TEST_CONFIG: RybbitConfig = { siteId: 1, apiBase: 'https://api.test.io/api
 // Use the test environment origin so same-origin check passes
 const SAME_ORIGIN_FILE = `${globalThis.location?.origin}/app.js`;
 
+type ErrorTrackerPrivate = {
+  dedupeCache: Map<string, number>;
+  handleError: (err: Error, meta: Record<string, unknown>) => void;
+};
+
 describe('RybbitErrorTrackerService', () => {
   let service: RybbitErrorTrackerService;
   let trackErrorFn: ReturnType<typeof vi.fn>;
@@ -30,12 +35,12 @@ describe('RybbitErrorTrackerService', () => {
   afterEach(() => {
     vi.clearAllMocks();
     // Reset dedupe cache
-    (service as any).dedupeCache.clear();
+    (service as unknown as ErrorTrackerPrivate).dedupeCache.clear();
   });
 
   // Call the private handler directly with full control
   function handle(err: Error, meta: Record<string, unknown> = {}) {
-    (service as any).handleError(err, meta);
+    (service as unknown as ErrorTrackerPrivate).handleError(err, meta);
   }
 
   describe('basic error tracking', () => {
@@ -97,7 +102,7 @@ describe('RybbitErrorTrackerService', () => {
     it('tracks the same error again after 1 minute', () => {
       const key = ['Error', 'Stale error', SAME_ORIGIN_FILE, 1, 1].join('|');
       // Pre-populate dedupe cache as if error was seen 2 minutes ago
-      (service as any).dedupeCache.set(key, Date.now() - 120_000);
+      (service as unknown as ErrorTrackerPrivate).dedupeCache.set(key, Date.now() - 120_000);
       handle(new Error('Stale error'), { filename: SAME_ORIGIN_FILE, lineno: 1, colno: 1 });
       expect(trackErrorFn).toHaveBeenCalledOnce();
     });

@@ -9,12 +9,18 @@ export function resolveFetchMode(apiBase: string): RequestMode {
  * Sends a fire-and-forget POST. Prefers `navigator.sendBeacon` (survives page unload),
  * falls back to `fetch` with `keepalive: true`.
  */
-export async function postBeacon(url: string, payload: object, apiBase: string, debug?: boolean): Promise<void> {
+export async function postBeacon(
+  url: string,
+  payload: object,
+  apiBase: string,
+  debug?: boolean,
+): Promise<void> {
   const body = JSON.stringify(payload);
   if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
     const queued = navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
     if (queued) return;
-    if (debug) console.warn('[Rybbit] sendBeacon rejected (payload too large?), falling back to fetch');
+    if (debug)
+      console.warn('[Rybbit] sendBeacon rejected (payload too large?), falling back to fetch');
   }
   try {
     await fetch(url, {

@@ -8,6 +8,11 @@ import type { RybbitConfig } from './rybbit.config';
 
 const TEST_CONFIG: RybbitConfig = { siteId: 1, apiBase: 'https://api.test.io/api' };
 
+type FormTrackerPrivate = {
+  handleSubmit: (e: { target: EventTarget | null }) => void;
+  handleChange: (e: { target: EventTarget | null }) => void;
+};
+
 describe('RybbitFormTrackerService', () => {
   let service: RybbitFormTrackerService;
   let trackFormSubmitFn: ReturnType<typeof vi.fn>;
@@ -35,12 +40,12 @@ describe('RybbitFormTrackerService', () => {
     document.body.innerHTML = '';
   });
 
-  function dispatchSubmit(form: HTMLFormElement) {
-    (service as any).handleSubmit({ target: form });
+  function dispatchSubmit(form: HTMLFormElement | HTMLElement) {
+    (service as unknown as FormTrackerPrivate).handleSubmit({ target: form });
   }
 
   function dispatchChange(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
-    (service as any).handleChange({ target: el });
+    (service as unknown as FormTrackerPrivate).handleChange({ target: el });
   }
 
   describe('form submit', () => {
@@ -62,8 +67,8 @@ describe('RybbitFormTrackerService', () => {
     });
 
     it('does not track non-form elements', () => {
-      const div = document.createElement('div') as any;
-      (service as any).handleSubmit({ target: div });
+      const div = document.createElement('div');
+      (service as unknown as FormTrackerPrivate).handleSubmit({ target: div });
       expect(trackFormSubmitFn).not.toHaveBeenCalled();
     });
   });

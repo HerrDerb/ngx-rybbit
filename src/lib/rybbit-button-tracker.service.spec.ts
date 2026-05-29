@@ -8,6 +8,10 @@ import type { RybbitConfig } from './rybbit.config';
 
 const TEST_CONFIG: RybbitConfig = { siteId: 1, apiBase: 'https://api.test.io/api' };
 
+type ButtonTrackerPrivate = {
+  handleClick: (e: { target: EventTarget | null }) => void;
+};
+
 describe('RybbitButtonTrackerService', () => {
   let service: RybbitButtonTrackerService;
   let trackButtonClickFn: ReturnType<typeof vi.fn>;
@@ -32,8 +36,8 @@ describe('RybbitButtonTrackerService', () => {
   });
 
   // Helper: call private handleClick
-  function dispatchHandle(el: HTMLElement) {
-    (service as any).handleClick({ target: el });
+  function dispatchHandle(el: HTMLElement | null) {
+    (service as unknown as ButtonTrackerPrivate).handleClick({ target: el });
   }
 
   describe('findButton', () => {
@@ -85,7 +89,7 @@ describe('RybbitButtonTrackerService', () => {
     });
 
     it('does NOT track a plain text node', () => {
-      dispatchHandle(null as any);
+      dispatchHandle(null);
       expect(trackButtonClickFn).not.toHaveBeenCalled();
     });
   });

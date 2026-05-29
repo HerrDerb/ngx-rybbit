@@ -24,7 +24,11 @@ export class RybbitConfigFetcherService {
     const config = this.runtimeState.config;
     try {
       const url = `${config.apiBase}/site/tracking-config/${config.siteId}`;
-      const resp = await fetch(url, { method: 'GET', credentials: 'omit', mode: resolveFetchMode(config.apiBase) });
+      const resp = await fetch(url, {
+        method: 'GET',
+        credentials: 'omit',
+        mode: resolveFetchMode(config.apiBase),
+      });
       if (!resp.ok) return config;
       const remote: RemoteTrackingConfig = await resp.json();
       return {

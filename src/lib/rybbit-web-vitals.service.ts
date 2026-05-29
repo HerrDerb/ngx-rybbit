@@ -33,13 +33,15 @@ export class RybbitWebVitalsService {
 
     // Use Function() to prevent Vite/bundlers from statically resolving this
     // optional peer dependency at pre-bundle time.
-    (Function('return import("web-vitals")')() as Promise<{
-      onLCP: (cb: (m: { value: number }) => void) => void;
-      onCLS: (cb: (m: { value: number }) => void) => void;
-      onINP: (cb: (m: { value: number }) => void) => void;
-      onFCP: (cb: (m: { value: number }) => void) => void;
-      onTTFB: (cb: (m: { value: number }) => void) => void;
-    }>)
+    (
+      Function('return import("web-vitals")')() as Promise<{
+        onLCP: (cb: (m: { value: number }) => void) => void;
+        onCLS: (cb: (m: { value: number }) => void) => void;
+        onINP: (cb: (m: { value: number }) => void) => void;
+        onFCP: (cb: (m: { value: number }) => void) => void;
+        onTTFB: (cb: (m: { value: number }) => void) => void;
+      }>
+    )
       .then(({ onLCP, onCLS, onINP, onFCP, onTTFB }) => {
         onLCP((m) => {
           this.vitals['lcp'] = m.value;
