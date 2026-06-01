@@ -4,6 +4,7 @@ import type { RybbitConfig } from './rybbit.config';
 import { resolveFetchMode } from './rybbit.config';
 
 interface RemoteTrackingConfig {
+  disabled?: boolean;
   trackInitialPageView?: boolean;
   trackSpaNavigation?: boolean;
   trackUrlParams?: boolean;
@@ -33,6 +34,7 @@ export class RybbitConfigFetcherService {
       const remote: RemoteTrackingConfig = await resp.json();
       return {
         ...config,
+        disabled: remote.disabled ?? config.disabled,
         autoTrackPageview: remote.trackInitialPageView ?? config.autoTrackPageview,
         autoTrackSpa: remote.trackSpaNavigation ?? config.autoTrackSpa,
         trackQuerystring: remote.trackUrlParams ?? config.trackQuerystring,

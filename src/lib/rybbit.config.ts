@@ -40,6 +40,8 @@ export interface RybbitConfig {
   siteId: string | number;
   /** Required — base URL or relative path of your Rybbit API, e.g. 'https://app.rybbit.io/api' or '/api' */
   apiBase: string;
+  /** Disables the rybbit tracking */
+  disabled?: boolean;
   /** localStorage key prefix. Default: 'rybbit' */
   namespace?: string;
   /** Log errors and warnings to console. Default: false */

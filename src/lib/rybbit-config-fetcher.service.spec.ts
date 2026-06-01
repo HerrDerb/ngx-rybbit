@@ -77,6 +77,48 @@ describe('RybbitConfigFetcherService', () => {
     vi.unstubAllGlobals();
   });
 
+  it('remote disabled:true is merged into result', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ disabled: true }),
+      }),
+    );
+    const service = setupFetcher({ disabled: false });
+    const result = await service.fetchAndMergeRemoteConfig();
+    expect(result.disabled).toBe(true);
+    vi.unstubAllGlobals();
+  });
+
+  it('remote disabled:false overrides local disabled:true', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ disabled: false }),
+      }),
+    );
+    const service = setupFetcher({ disabled: true });
+    const result = await service.fetchAndMergeRemoteConfig();
+    expect(result.disabled).toBe(false);
+    vi.unstubAllGlobals();
+  });
+
+  it('remote disabled undefined falls back to local disabled:true', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({}), // no disabled field
+      }),
+    );
+    const service = setupFetcher({ disabled: true });
+    const result = await service.fetchAndMergeRemoteConfig();
+    expect(result.disabled).toBe(true);
+    vi.unstubAllGlobals();
+  });
+
   it('merges all supported remote keys', async () => {
     vi.stubGlobal(
       'fetch',
