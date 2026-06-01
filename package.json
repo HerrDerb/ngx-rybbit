@@ -1,10 +1,9 @@
 {
   "name": "ngx-rybbit",
   "version": "0.0.1",
-  "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/HerrDerb/ngx-rybbit.git"
+    "url": "git+https://github.com/HerrDerb/ngx-rybbit.git"
   },
   "description": "Angular analytics library for Rybbit — auto-tracks navigation, clicks, forms, errors, web vitals and session replay.",
   "license": "MIT",
