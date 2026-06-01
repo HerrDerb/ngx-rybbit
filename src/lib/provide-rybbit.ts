@@ -54,6 +54,7 @@ export function provideRybbit(config: RybbitConfig): EnvironmentProviders {
 
       // 1. Fetch remote feature-flag config and merge with local config
       const mergedConfig = await configFetcher.fetchAndMergeRemoteConfig();
+      if (mergedConfig.disabled) return; // short-circuit if tracking is disabled
 
       // 2. Publish merged config — all services now see the correct effective config
       runtimeState.setEffectiveConfig(mergedConfig);
