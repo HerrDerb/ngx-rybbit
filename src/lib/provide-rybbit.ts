@@ -52,6 +52,18 @@ export function provideRybbit(config: RybbitConfig): EnvironmentProviders {
       const webVitals = inject(RybbitWebVitalsService);
       const sessionReplay = inject(RybbitSessionReplayService);
 
+      // 0. Optional remote enable-check — abort early if disabled
+      if (config.enableCheckUrl) {
+        try {
+          const res = await fetch(config.enableCheckUrl, { method: 'GET', cache: 'no-store' });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data?.enabled) return;
+        } catch {
+          return;
+        }
+      }
+
       // 1. Fetch remote feature-flag config and merge with local config
       const mergedConfig = await configFetcher.fetchAndMergeRemoteConfig();
       if (mergedConfig.disabled) return; // short-circuit if tracking is disabled

@@ -42,6 +42,12 @@ export interface RybbitConfig {
   apiBase: string;
   /** Disables the rybbit tracking */
   disabled?: boolean;
+  /**
+   * Relative URL (resolved against the current origin) that returns `{ "enabled": boolean }`.
+   * When provided, Rybbit fetches this endpoint before initializing.
+   * If the response is `{ enabled: false }` or the request fails, initialization is aborted.
+   */
+  enableCheckUrl?: string;
   /** localStorage key prefix. Default: 'rybbit' */
   namespace?: string;
   /** Log errors and warnings to console. Default: false */

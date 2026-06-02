@@ -69,6 +69,7 @@ export const appConfig: ApplicationConfig = {
 |---|---|---|---|
 | `siteId` | `string \| number` | **required** | Site ID from the Rybbit dashboard |
 | `apiBase` | `string` | **required** | Base URL or relative path of your Rybbit API (e.g. `'https://app.rybbit.io/api'` or `'/api'`) |
+| `enableCheckUrl` | `string` | — | Optional Check. Relative URL that must return `{ "enabled": boolean }`. If absent, schema not matched, unreachable, or returns `false`, all tracking is skipped |
 | `namespace` | `string` | `'rybbit'` | `localStorage` key prefix |
 | `debug` | `boolean` | `false` | Log errors/warnings to console |
 | `autoTrackPageview` | `boolean` | `true` | Track initial page load |
@@ -96,6 +97,25 @@ provideRybbit({
   skipPatterns: ['/kitchen/drafts/**', '/admin/*'],
   maskPatterns: ['/recipes/*/edit', 're:/users/\\d+'],
 })
+```
+
+### Remote enable check
+
+When `enableCheckUrl` is set, Rybbit fetches that URL **before any initialization**. The endpoint must return `{ "enabled": boolean }`. If it returns `false`, is unreachable, or responds with a non-2xx status, the library aborts silently — nothing is tracked.
+
+Use this to toggle analytics on/off from your backend without redeploying:
+
+```ts
+provideRybbit({
+  siteId: 42,
+  apiBase: 'https://app.rybbit.io/api',
+  enableCheckUrl: '/api/analytics-enabled',
+})
+```
+
+```json
+// GET /api/analytics-enabled
+{ "enabled": true }
 ```
 
 ## Custom events

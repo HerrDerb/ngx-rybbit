@@ -29,7 +29,10 @@ interface Mocks {
   sessionReplayInitialize: ReturnType<typeof vi.fn>;
 }
 
-function setup(mergedConfigOverrides: Partial<RybbitConfig>): Mocks {
+function setup(
+  mergedConfigOverrides: Partial<RybbitConfig>,
+  localConfigOverrides: Partial<RybbitConfig> = {},
+): Mocks {
   const mocks: Mocks = {
     fetchAndMergeRemoteConfig: vi
       .fn()
@@ -48,7 +51,7 @@ function setup(mergedConfigOverrides: Partial<RybbitConfig>): Mocks {
 
   TestBed.configureTestingModule({
     providers: [
-      provideRybbit(BASE_CONFIG),
+      provideRybbit({ ...BASE_CONFIG, ...localConfigOverrides }),
       { provide: PLATFORM_ID, useValue: 'browser' },
       {
         provide: RybbitConfigFetcherService,
@@ -109,5 +112,63 @@ describe('provideRybbit initializer', () => {
 
     expect(mocks.setEffectiveConfig).toHaveBeenCalledOnce();
     expect(mocks.rybbitInitialize).toHaveBeenCalledOnce();
+  });
+});
+
+describe('provideRybbit — enableCheckUrl', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  function makeResponse(enabled: boolean, ok = true) {
+    return Promise.resolve({ ok, json: () => Promise.resolve({ enabled }) } as Response);
+  }
+
+  it('skips fetch and initializes when enableCheckUrl is not set', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const mocks = setup({ disabled: false });
+    await TestBed.inject(ApplicationInitStatus).donePromise;
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(mocks.setEffectiveConfig).toHaveBeenCalledOnce();
+  });
+
+  it('initializes when endpoint returns enabled:true', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeResponse(true)));
+    const mocks = setup({ disabled: false }, { enableCheckUrl: '/api/enabled' });
+    await TestBed.inject(ApplicationInitStatus).donePromise;
+
+    expect(mocks.setEffectiveConfig).toHaveBeenCalledOnce();
+    expect(mocks.rybbitInitialize).toHaveBeenCalledOnce();
+  });
+
+  it('aborts when endpoint returns enabled:false', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeResponse(false)));
+    const mocks = setup({ disabled: false }, { enableCheckUrl: '/api/enabled' });
+    await TestBed.inject(ApplicationInitStatus).donePromise;
+
+    expect(mocks.setEffectiveConfig).not.toHaveBeenCalled();
+    expect(mocks.rybbitInitialize).not.toHaveBeenCalled();
+    expect(mocks.trackPageview).not.toHaveBeenCalled();
+  });
+
+  it('aborts when endpoint returns non-ok response', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeResponse(true, false)));
+    const mocks = setup({ disabled: false }, { enableCheckUrl: '/api/enabled' });
+    await TestBed.inject(ApplicationInitStatus).donePromise;
+
+    expect(mocks.setEffectiveConfig).not.toHaveBeenCalled();
+    expect(mocks.rybbitInitialize).not.toHaveBeenCalled();
+  });
+
+  it('aborts when fetch throws (network error)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('net fail')));
+    const mocks = setup({ disabled: false }, { enableCheckUrl: '/api/enabled' });
+    await TestBed.inject(ApplicationInitStatus).donePromise;
+
+    expect(mocks.setEffectiveConfig).not.toHaveBeenCalled();
+    expect(mocks.rybbitInitialize).not.toHaveBeenCalled();
   });
 });
