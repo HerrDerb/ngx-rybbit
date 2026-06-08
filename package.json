@@ -58,7 +58,7 @@
     "@typescript-eslint/parser": "^8.60.0",
     "eslint": "^10.4.0",
     "happy-dom": "^20.9.0",
-    "ng-packagr": "^21.2.0",
+    "ng-packagr": "^22.0.0",
     "prettier": "^3.8.1",
     "rrweb": "^2.0.0-alpha.4",
     "rxjs": "~7.8.0",
